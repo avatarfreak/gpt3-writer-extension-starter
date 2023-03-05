@@ -1,5 +1,31 @@
 body {
   min-width: 250px;
+  background-color: black;
+}
+
+
+.wrapper {
+  color: rgb(224, 163, 93);
+  font-size: medium;
+  letter-spacing: 1px;
+}
+
+.wrapper input,
+button {
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.wrapper button {
+  border: 0;
+}
+.inside-wrapper {
+  display: flex;
+}
+
+.award {
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 #key_entered {
