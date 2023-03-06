@@ -17,5 +17,16 @@
     "contextMenus",
     "tabs",
     "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "scripts/content.js"
+      ]
+    }
   ]
 }
