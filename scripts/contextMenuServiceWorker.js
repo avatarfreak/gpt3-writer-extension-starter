@@ -1,19 +1,6 @@
-const sendMessage = (content) => {
-
-	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		const activeTab = tabs[0].id;
-
-		chrome.tabs.sendMessage(activeTab, { message: 'inject', content }, (response) => {
-			if (response.status === 'failed') {
-				console.log('injection failed.');
-			}
-		});
-	});
-}
-
 // Function to get + decode API key
 const getKey = () => {
-	return new Promise((resolve, _reject) => {
+	return new Promise((resolve, reject) => {
 		chrome.storage.local.get(["openai-key"], (result) => {
 			if (result["openai-key"]) {
 				const decodedKey = atob(result["openai-key"]);
@@ -23,6 +10,21 @@ const getKey = () => {
 	});
 };
 
+const sendMessage = (content) => {
+	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+		const activeTab = tabs[0].id;
+
+		chrome.tabs.sendMessage(
+			activeTab,
+			{ message: "inject", content },
+			(response) => {
+				if (response.status === "failed") {
+					console.log("injection failed.");
+				}
+			}
+		);
+	});
+};
 
 // Setup our generate function
 const generate = async (prompt) => {
@@ -53,37 +55,39 @@ const generate = async (prompt) => {
 // New function here
 const generateCompletionAction = async (info) => {
 	try {
+		// Send mesage with generating text (this will be like a loading indicator)
+		sendMessage("generating...");
 
 		const { selectionText } = info;
 		const basePromptPrefix = `
-      Write me a detailed table of contents for a blog post with the title below.
-  
-      Title:
-      `;
+			      Write me a detailed table of contents for a blog post with the title below.
+
+		        Title:
+		      `;
 
 		// Add this to call GPT-3
-		const baseCompletion = await generate(
-			`${basePromptPrefix}${selectionText}`
-		);
+		const baseCompletion = await generate( `${basePromptPrefix}${selectionText}`);
 
-		// Second prompt
-		const secondPromptCompletion = `
-      Take the table of contents and title of the blog post below and generate a blod post written in the style of Paul Graham. Make it feel like a story. Don't just list the points. Go deep into each one. Explain why.
+		// Add your second prompt here
+		const secondPrompt = `
+			        Take the table of contents and title of the blog post below and generate a blog post written in thwe style of Paul Graham. Make it feel like a story. Don't just list the points. Go deep into each one. Explain why.
 
-      Title: ${selectionText}
+		                Title: ${selectionText}
 
-      Table of Contents: ${baseCompletion.text}
+		                Table of Contents: ${baseCompletion.text}
 
-      Blog Post:
+		                Blog Post:
+		        `;
 
-    `;
+		// Call your second prompt
+		const secondPromptCompletion = await generate(secondPrompt);
 
 		// Send the output when we're all done
-		sendMessage(secondPromptCompletion);
-
+		sendMessage(secondPromptCompletion.text);
 	} catch (error) {
 		console.log(error);
-		// Send error if occurred
+
+		// Add this here as well to see if we run into any errors!
 		sendMessage(error.toString());
 	}
 };
@@ -98,4 +102,4 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Add listener
-chrome.contextMenus.onClicked.addListener(generateCompletionAction);
+chrome.contextMenus.onClicked.addListener(generateCompletionAction);   
