@@ -11,9 +11,9 @@
     "default_title": "Generate blog post"
   },
   "background": {
-    "service_worker": "scripts/contextMenuServiceWorker.js"
+    "service_worker": "./scripts/contextMenuServiceWorker.js"
   },
-  "permission": [
+  "permissions": [
     "contextMenus",
     "tabs",
     "storage"
