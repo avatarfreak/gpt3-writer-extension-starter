@@ -1,6 +1,19 @@
+const sendMessage = (content) => {
+
+	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+		const activeTab = tabs[0].id;
+
+		chrome.tabs.sendMessage(activeTab, { message: 'inject', content }, (response) => {
+			if (response.status === 'failed') {
+				console.log('injection failed.');
+			}
+		});
+	});
+}
+
 // Function to get + decode API key
 const getKey = () => {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve, _reject) => {
 		chrome.storage.local.get(["openai-key"], (result) => {
 			if (result["openai-key"]) {
 				const decodedKey = atob(result["openai-key"]);
@@ -53,9 +66,25 @@ const generateCompletionAction = async (info) => {
 			`${basePromptPrefix}${selectionText}`
 		);
 
-		console.log(baseCompletion.text)
+		// Second prompt
+		const secondPromptCompletion = `
+      Take the table of contents and title of the blog post below and generate a blod post written in the style of Paul Graham. Make it feel like a story. Don't just list the points. Go deep into each one. Explain why.
+
+      Title: ${selectionText}
+
+      Table of Contents: ${baseCompletion.text}
+
+      Blog Post:
+
+    `;
+
+		// Send the output when we're all done
+		sendMessage(secondPromptCompletion);
+
 	} catch (error) {
 		console.log(error);
+		// Send error if occurred
+		sendMessage(error.toString());
 	}
 };
 
