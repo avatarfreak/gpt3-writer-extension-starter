@@ -18,6 +18,9 @@
     "tabs",
     "storage"
   ],
+  "host_permissions": [
+    "https://*/*"
+  ],
   "content_scripts": [
     {
       "matches": [
